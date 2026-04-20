@@ -1,5 +1,3 @@
-"""Document chunking with configurable size and overlap."""
-
 from app.config import settings
 
 
@@ -8,7 +6,6 @@ def chunk_text(
     size: int = settings.chunk_size,
     overlap: int = settings.chunk_overlap,
 ) -> list[str]:
-    """Split text into chunks of `size` characters with `overlap`."""
     if not text:
         return []
     chunks = []
@@ -16,7 +13,6 @@ def chunk_text(
     step = size - overlap
     while i < len(text):
         chunk = text[i : i + size]
-        # Skip trailing slivers that are fully covered by the previous chunk's overlap
         if chunks and len(chunk) <= overlap:
             break
         chunks.append(chunk)

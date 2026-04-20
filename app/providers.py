@@ -1,5 +1,3 @@
-"""Provider-agnostic LLM adapter with retries and fallback."""
-
 from abc import ABC, abstractmethod
 
 from pydantic import BaseModel
@@ -75,14 +73,12 @@ class OpenAIProvider(LLMProvider):
 
 
 class OllamaProvider(LLMProvider):
-    """Uses Ollama's OpenAI-compatible API running locally."""
-
     def __init__(self):
         from openai import AsyncOpenAI
 
         self.client = AsyncOpenAI(
             base_url="http://localhost:11434/v1",
-            api_key="ollama",  # Ollama doesn't need a real key
+            api_key="ollama",
         )
 
     @retry(
@@ -113,7 +109,6 @@ def _resolve_provider(model: str) -> str:
 
 
 class LLMRouter:
-    """Routes requests to the right provider, with fallback on failure."""
 
     def __init__(self):
         self._providers: dict[str, LLMProvider] = {}

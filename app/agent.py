@@ -1,10 +1,6 @@
-"""Tool-calling agent loop using Anthropic's tool use API."""
-
 from anthropic import Anthropic
 
 client = Anthropic()
-
-# -- Tool definitions (extend this registry as needed) -----------------------
 
 TOOLS = [
     {
@@ -25,7 +21,6 @@ TOOLS = [
 
 
 def _search_knowledge_base(query: str) -> str:
-    """Hook into the RAG retrieval pipeline."""
     from app.db import retrieve
 
     results = retrieve(query)
@@ -41,14 +36,11 @@ HANDLERS = {
 }
 
 
-# -- Agent loop ---------------------------------------------------------------
-
 def run_agent(
     user_msg: str,
     system: str = "You are a helpful assistant with access to a knowledge base.",
     max_steps: int = 5,
 ) -> str:
-    """Run a ReAct-style agent loop with tool calling."""
     messages = [{"role": "user", "content": user_msg}]
 
     for _ in range(max_steps):
@@ -60,12 +52,10 @@ def run_agent(
             messages=messages,
         )
 
-        # If the model finished without calling tools, return the text
         if resp.stop_reason == "end_turn":
             text_blocks = [b for b in resp.content if hasattr(b, "text")]
             return text_blocks[0].text if text_blocks else ""
 
-        # Process tool calls
         tool_uses = [b for b in resp.content if b.type == "tool_use"]
         messages.append({"role": "assistant", "content": resp.content})
 

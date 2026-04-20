@@ -1,5 +1,3 @@
-"""CLI script to ingest markdown files from the docs/ directory."""
-
 import sys
 from pathlib import Path
 
@@ -7,7 +5,6 @@ from app.db import index_document, init_db
 
 
 def ingest_directory(docs_dir: str = "docs"):
-    """Read all .md files in a directory and index them."""
     init_db()
     docs_path = Path(docs_dir)
 

@@ -1,5 +1,3 @@
-"""pgvector-backed vector store for RAG retrieval."""
-
 import numpy as np
 import psycopg
 from pgvector.psycopg import register_vector
@@ -20,7 +18,6 @@ def get_conn(register_vec: bool = True) -> psycopg.Connection:
 
 
 def init_db():
-    """Create the chunks table and vector index."""
     with get_conn(register_vec=False) as conn:
         conn.execute("CREATE EXTENSION IF NOT EXISTS vector")
         conn.execute(
@@ -33,7 +30,6 @@ def init_db():
                 )
             """).format(dim=sql.Literal(settings.embedding_dim))
         )
-        # Drop old IVFFlat index if it exists (doesn't work with few rows)
         conn.execute("DROP INDEX IF EXISTS chunks_embedding_idx")
         conn.execute("""
             CREATE INDEX IF NOT EXISTS chunks_embedding_hnsw_idx
@@ -42,7 +38,6 @@ def init_db():
 
 
 def index_document(doc_id: str, text: str):
-    """Chunk a document, embed, and store in pgvector."""
     chunks = chunk_text(text)
     vectors = embedder.encode(chunks).tolist()
     with get_conn() as conn:
@@ -55,7 +50,6 @@ def index_document(doc_id: str, text: str):
 
 
 def retrieve(query: str, k: int = settings.retrieval_top_k) -> list[dict]:
-    """Retrieve the top-k most similar chunks for a query."""
     query_vec = np.array(embedder.encode([query])[0])
     with get_conn() as conn:
         rows = conn.execute(
@@ -71,6 +65,5 @@ def retrieve(query: str, k: int = settings.retrieval_top_k) -> list[dict]:
 
 
 def delete_document(doc_id: str):
-    """Remove all chunks for a given document."""
     with get_conn() as conn:
         conn.execute("DELETE FROM chunks WHERE doc_id = %s", (doc_id,))
